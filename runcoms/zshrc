@@ -11,3 +11,64 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Customize to your needs...
+# add gnu commands using default names ie not gtar
+export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Lazy nvm loading. See https://www.reddit.com/r/node/comments/4tg5jg/lazy_load_nvm_for_faster_shell_start/d5ib9fs/
+# removed due to vim issues
+# declare -a NODE_GLOBALS=(`find ~/.nvm/versions/node -maxdepth 3 -type l -wholename '*/bin/*' | xargs -n1 basename | sort | uniq`)
+#
+# NODE_GLOBALS+=("node")
+# NODE_GLOBALS+=("nvm")
+# NODE_GLOBALS+=("nvim")
+#
+# load_nvm () {
+#     unset -f ${NODE_GLOBALS};
+#     export NVM_DIR=~/.nvm
+#     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# }
+#
+# for cmd in "${NODE_GLOBALS[@]}"; do
+#     eval "${cmd}(){ load_nvm; ${cmd} \$@ }"
+# done
+
+# Allow quick directory changes to common paths
+export CDPATH=~/projects:$CDPATH
+
+# Set gopath
+export GOPATH=/Users/benjamin.shawibm.com/gopath
+export PATH=$PATH:$GOPATH/bin
+
+# Aliases
+alias vim="nvim"
+alias zv="vim ~/.zshrc"
+alias zs="source ~/.zshrc"
+alias cpeslint="cp ~/.config/eslint/eslintrc.js .eslintrc.js"
+alias vv="pushd ~/.config/nvim; nvim ~/.config/nvim/init.lua; popd"
+alias ctags="`brew --prefix`/bin/ctags"
+alias sed="gsed"
+alias date="gdate"
+# alias squash="git reset $(git merge-base master $(git branch --show-current))"
+alias tmpdir="cd $(mktemp -d)"
+
+setopt NO_BEEP
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_COMPLETION_TRIGGER='**'
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --no-ignore-vcs --exclude .git --exclude node_modules --exclude .cache --exclude vendor --exclude jce'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+function loginsvl {
+    op signin --account ibm
+    local INTRANET_USER=$(echo "op://Private/Intranet/username" | op inject)
+    local INTRANET_PASS=$(echo "op://Private/Intranet/password" | op inject)
+
+    curl -s -o /dev/null -k -F login="Log In Now" https://9.30.156.21/netaccess/connstatus.html
+    curl -s -k -F username="$INTRANET_USER" -F password="$INTRANET_PASS" https://9.30.156.21/netaccess/loginuser.html | grep -Eq "SPN Authentication Successful" && echo "SPN Authentication Successful" || echo "Error"
+    op signout
+}
